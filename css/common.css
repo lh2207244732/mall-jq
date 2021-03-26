@@ -1,0 +1,131 @@
+/* 页面共通样式 */
+body{
+    font-size: 12px;
+    background-color: #eee;
+}
+.container{
+    width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+}
+a{
+    color: #333;
+    text-decoration: none;
+}
+a:hover{
+    color: #1890ff;
+}
+.col-1{
+    width: 208px;
+}
+.col-gap{
+margin-right: 10px;
+}
+.col-4{
+    width: 862px;
+}
+.clearfix::after{
+    content: "";
+    clear: both;
+    display: block;
+    height: 0;
+    visibility: hidden;
+}
+.clearfix{
+    *zoom: 1;
+}
+/* 商品共通样式 */
+ .product-list .product-item{
+    float: left;
+    height: 300px;
+    background-color: #fff;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 20px 10px;
+    transition: all 0.3s;
+}
+
+.product-list .product-item:hover{
+    box-shadow: 0 2px 3px rgba(0, 0, 0, .3);
+}
+ .product-list .product-item .product-name{
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 20px;
+}
+ .product-list .product-item .product-price{
+    float: left;
+    font-size: 14px;
+    color: #f21;
+}
+ .product-list .product-item .paynum{
+    float: right;
+    font-size: 14px;
+    color: #aaa;
+}
+/* 等待动画共通样式 */
+.loader{
+    position: relative;
+    width: 4px;
+    height: 20px;
+    background-color: #52c41a;
+    margin: 0 auto; 
+    animation: loading 0.3s linear 0s infinite alternate;
+}
+.loader:after,.loader:before{
+    position: absolute;
+    top:0;
+    left:0;
+    display: block;
+    content: '';
+    width: 4px;
+    height: 20px;
+    background-color:  #52c41a;
+}
+.loader:after{
+    margin-left: 10px;
+    transform: scale(1,0.5);
+    animation: loading 0.3s linear 0.3s infinite alternate;
+}
+.loader:before{
+    margin-left: -10px;
+    transform: scale(1,0.5);
+    animation: loading 0.3s linear 0.5s infinite alternate;
+}
+@keyframes loading{
+    from{
+        opacity: 0.5;
+        transform: scale(1,0.5);
+    }
+    to{
+        opacity: 1;
+        transform: scale(1,1);
+    }
+}
+.text-ellipsis{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.btn{
+    display: inline-block;  
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    background-color: #52c41a;
+    text-decoration: none;
+    text-align: center;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 10px;
+}
+a.btn:hover{
+    color: #fff;
+    opacity: 0.8;
+}

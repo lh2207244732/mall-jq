@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城首页</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/iconfont.css">
+    <link rel="stylesheet" href="libs/carousel/carousel.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 顶部导航开始 -->
+        <div class="top">
+            <div class="user-info">
+                <div class="not-login">
+                    <a href="#">登录</a>
+                    <a href="#">注册</a>
+                </div>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item cart-box">
+                    <a href="#">
+                        <i class="iconfont icon-cart"></i>
+                        购物车
+                        (
+                        <span class="cart-count">0</span>
+                        )
+                    </a>
+                    <div class="cart-content">
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="#">个人中心</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">我的订单</a>
+                </li>
+            </ul>
+
+        </div>
+        <!-- 顶部导航结束 -->
+        <!-- 头部搜索开始 -->
+        <div class="header">
+            <div class="logo col-1 col-gap">
+                <h1>
+                    <a href="#">SortMall</a>
+                </h1>
+            </div>
+            <div class="search-wrap">
+                <div class="search-box clearfix">
+                    <input type="text" class="search-input" placeholder="请输入搜索关键字">
+                    <a href="javascript:;" class="search-btn">搜索</a>
+                    <ul class="search-layer">
+                        <!-- <li class="search-item">衣服</li> -->
+                    </ul>
+                </div>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#">全部商品</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#">热卖商品</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- 头部搜索结束 -->
+        <!-- 焦点区域开始 -->
+        <div class="focus clearfix">
+            <div class="categories col-1 col-gap">
+                <div class="parent-categories">
+                </div>
+                <div class="child-categories">
+                </div>
+            </div>
+            <div class="col-4" id="swiper">
+
+            </div>
+        </div>
+        <!-- 焦点区域结束 -->
+        <!-- 热销区域开始 -->
+        <div class="hot clearfix">
+            <div class="hot-card col-1 col-gap">
+                <h4>热销推荐</h4>
+                <i class="iconfont icon-cart"></i>
+            </div>
+            <ul class="product-list col-4">
+            </ul>
+        </div>
+        <!-- 热销区域结束 -->
+        <!-- 楼层开始 -->
+        <div class="floor">
+
+        </div>
+        <!-- 楼层结束 -->
+        <!-- 底部开始 -->
+        <div class="footer">
+            <div class="promise-box">
+                <span class="icon icon1">七天无理由退货</span>
+                <span class="icon icon2">满99全场包邮</span>
+                <span class="icon icon3">假一赔十</span>
+            </div>
+            <div class="links">
+                <a href="#">百度</a>
+                <a href="#">淘宝</a>
+                <a href="#">京东</a>
+            </div>
+            <div class="copyright">
+                ©2021 Baidu (京)-经营性-2017-0020
+            </div>
+        </div>
+        <!-- 底部结束 -->
+        <!-- 电梯部分开始 -->
+        <div id="elevator" class="elevator container">
+
+            <!-- <a href="javascript:;" class="elevator-item">
+                <span class="elevator-item-num">F1</span>
+                <span class="elevator-item-text text-ellipsis" data-num="0">商品分类</span>
+            </a>
+            <a href="javascript:;" class="backToTop">
+                <span class="elevator-item-num"><i class="iconfont icon-jiantou"></i></span>
+                <span class="elevator-item-text text-ellipsis" id="backToTop">顶部</span>
+            </a> -->
+
+        </div>
+        <!-- 电梯部分结束 -->
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"
+    integrity="sha512-jGsMH83oKe9asCpkOVkBnUrDDTp8wl+adkB2D+//JtlxO4SrLoJdhbOysIFQJloQFD+C4Fl1rMsQZF76JjV0eQ=="
+    crossorigin="anonymous"></script>
+<script src="js/utils.js"></script>
+<script src="libs/jquery_plugin/jquery.search.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Mock.js/1.0.0/mock.js"></script>
+<script src="mock_data/index.js"></script> -->
+<script src="libs/carousel/carousel.js"></script>
+<script src="js/index.js"></script>
+
+</html>
