@@ -1,4 +1,15 @@
 ; (function ($) {
+    var cache = {
+        data: {
+
+        },
+        addData: function (keyword, value) {
+            this.data[keyword] = value
+        },
+        getData: function (keyword) {
+            return this.data[keyword]
+        }
+    }
     function Search($elem, options) {
         this.$elem = $elem
         this.$searchBtn = $elem.find(options.searchBtnSelector)
@@ -9,6 +20,7 @@
 
         this.searchTimer = null
         this.isSearchLayerEmpty = true
+        this.jqXHR = null
 
         this.init()
         if (this.$isAutocomplete) {
@@ -65,7 +77,16 @@
                 this.appendSearchLayerHTML('')
                 return
             }
-            utils.ajax({
+            if (cache.getData(keyword)) {
+                // 如果搜索的内容存在，则直接渲染
+                _this.renderSearchLayer(cache.getData(keyword))
+                return
+            }
+            //终止上一次没有完成的请求
+            if (this.jqXHR) {
+                this.jqXHR.abort()
+            }
+            this.jqXHR = utils.ajax({
                 method: "get",
                 url: this.url,
                 data: {
@@ -73,11 +94,16 @@
                 },
                 success: function (data) {
                     if (data.code == 0) {
+                        //缓存搜索的数据到内存中
+                        cache.addData(keyword, data.data)
                         _this.renderSearchLayer(data.data)
                     }
                 },
                 error: function (status) {
                     console.log('获取出错啦')
+                },
+                complete: function () {
+                    _this.jqXHR = null
                 }
             })
         },
