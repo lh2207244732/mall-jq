@@ -4,19 +4,20 @@
             this.$cartCount = $('.cart-count')
             this.$cartBox = $('.cart-box')
             this.$cartContent = $('.cart-content')
+            this.$categories = $('.categories')
+            this.$parentCategories = $('.parent-categories')
+            this.$childCategories = $('.child-categories')
 
             this.cartTimer = null
+            this.categoriesTimer = null
+
+            this.childCategoriesCache = {}
 
             this.handleCart()
-
             this.handleSearch()
+            this.handleCategories()
 
-            // this.searchBtn = document.querySelector('.search-btn')
-            // this.searchInput = document.querySelector('.search-input')
-            // this.searchLayer = document.querySelector('.search-layer')
-            // this.categories = d.querySelector('.categories')
-            // this.parentCategories = document.querySelector('.parent-categories')
-            // this.childCategories = d.querySelector('.child-categories')
+
             // this.hotProductList = d.querySelector('.hot .product-list')
             // this.floor = d.querySelector('.floor')
             // this.elevator = d.querySelector('#elevator')
@@ -30,9 +31,8 @@
             // this.floors = null
             // this.elevatorTimer = null
             // this.elevatorItems = null
-            // this.handleCart()
-            // this.handleSearch()
-            // this.handleCategories()
+
+
             // this.handleCarousel()
             // this.handleHotProductList()
             // this.handleFloor()
@@ -128,37 +128,33 @@
             // 获取父级分类
             this.getParentCategoriesData()
             // 用事件代理的方式处理父级分类项目的切换
-            this.categories.addEventListener('mouseover', function (event) {
-                if (!_this.parentCategoriesItem) {
-                    return
-                }
-                if (_this.categoriesTimer) {
-                    clearTimeout(_this.categoriesTimer)
-                }
-                _this.categoriesTimer = setTimeout(function () {
-                    var elem = event.target
-                    if (elem.className == 'parent-categories-item') {
-                        utils.show(_this.childCategories)
-                        var pid = elem.getAttribute('data-id')
-                        var index = elem.getAttribute('data-index')
-                        _this.getChildCategoriesData(pid)
-                        _this.parentCategoriesItem[_this.lastActiveIndex].className = 'parent-categories-item'
-                        _this.parentCategoriesItem[index].className = 'parent-categories-item active'
-                        _this.lastActiveIndex = index
+            this.$categories
+                .on('mouseover', '.parent-categories-item', function () {
+                    var $elem = $(this)
+                    if (_this.categoriesTimer) {
+                        clearTimeout(_this.categoriesTimer)
                     }
-                }, 100)
-            }, false)
-            this.categories.addEventListener('mouseleave', function (event) {
-                if (!_this.parentCategoriesItem) {
-                    return
-                }
-                if (_this.categoriesTimer) {
-                    clearTimeout(_this.categoriesTimer)
-                }
-                utils.hide(_this.childCategories)
-                _this.childCategories.innerHTML = ''
-                _this.parentCategoriesItem[_this.lastActiveIndex].className = 'parent-categories-item'
-            }, false)
+                    $elem.addClass('active').siblings().removeClass('active')
+                    _this.categoriesTimer = setTimeout(function () {
+                        _this.$childCategories.show()
+                        var pid = $elem.data('id')
+                        //判断缓存中是否有数据
+                        if (_this.childCategoriesCache[pid]) {
+                            _this.renderChildCategories(_this.childCategoriesCache[pid])
+                        } else {
+                            _this.getChildCategoriesData(pid)
+                        }
+
+                    }, 300)
+                })
+                .on('mouseleave', function () {
+                    if (_this.categoriesTimer) {
+                        clearTimeout(_this.categoriesTimer)
+                    }
+                    _this.$childCategories.hide().html('')
+                    _this.$parentCategories.find('.parent-categories-item').removeClass('active')
+
+                })
         },
         getParentCategoriesData: function () {
             var _this = this
@@ -171,13 +167,13 @@
                     }
                 },
                 error: function (status) {
-                    console.log(status)
+                    console.log('获取父级分类失败')
                 }
             })
         },
         getChildCategoriesData: function (pid) {
             var _this = this
-            this.childCategories.innerHTML = '<div class="loader"></div>'
+            this.$childCategories.html('<div class="loader"></div>')
             utils.ajax({
                 method: 'get',
                 url: '/categories/childArrayCategories',
@@ -187,10 +183,12 @@
                 success: function (data) {
                     if (data.code == 0) {
                         _this.renderChildCategories(data.data)
+                        //缓存数据
+                        _this.childCategoriesCache[pid] = data.data
                     }
                 },
                 error: function (status) {
-                    console.length(status)
+                    console.length('获取子分类失败')
                 }
             })
         },
@@ -202,9 +200,8 @@
                     html += ' <li class="parent-categories-item" data-id="' + list[i]._id + '" data-index="' + i + '" >' + list[i].name + '</li>'
                 }
                 html += '</ul>'
-                this.parentCategories.innerHTML = html
+                this.$parentCategories.html(html)
             }
-            this.parentCategoriesItem = d.querySelectorAll('.parent-categories-item')
         },
         renderChildCategories: function (list) {
             var len = list.length
@@ -219,7 +216,7 @@
                 </li>`
                 }
                 html += '</ul>'
-                this.childCategories.innerHTML = html
+                this.$childCategories.html(html)
             }
         },
         handleCarousel: function () {
