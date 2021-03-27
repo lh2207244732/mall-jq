@@ -1,3 +1,5 @@
+
+
 (function (w, d) {
     var pag = {
         init: function () {
@@ -7,20 +9,27 @@
             this.$categories = $('.categories')
             this.$parentCategories = $('.parent-categories')
             this.$childCategories = $('.child-categories')
+            this.$swiper = $('#swiper')
+            this.$hotProductList = $('.hot .product-list')
+            this.$floor = $('.floor')
+            this.$elevator = $('#elevator')
+            this.$win = $(window)
 
             this.cartTimer = null
             this.categoriesTimer = null
-
             this.childCategoriesCache = {}
 
             this.handleCart()
             this.handleSearch()
             this.handleCategories()
+            this.handleCarousel()
+            this.handleHotProductList()
+            this.handleFloor()
+            this.handleElevator()
 
 
-            // this.hotProductList = d.querySelector('.hot .product-list')
-            // this.floor = d.querySelector('.floor')
-            // this.elevator = d.querySelector('#elevator')
+
+
 
             // this.searchTimer = null
             // this.categoriesTimer = null
@@ -33,10 +42,10 @@
             // this.elevatorItems = null
 
 
-            // this.handleCarousel()
-            // this.handleHotProductList()
-            // this.handleFloor()
-            // this.handleElevator()
+
+
+
+
 
         },
         loadCartCount: function () {
@@ -239,39 +248,47 @@
         },
         renderCarousel: function (list) {
             var imgs = list.map(function (item) {
-                return item.image
+                return item.imageUrl
             })
-            new SlideCarousel({
-                id: 'swiper',
+            this.$swiper.carousel({
                 imgs: imgs,
                 width: 862,
                 height: 440,
-                playInterval: 2000
+                playInterval: 0,
+                type: 'slide'
             })
         },
         handleHotProductList: function () {
             var _this = this
-            utils.ajax({
-                method: 'get',
-                url: '/products/hot',
-                success: function (data) {
-                    if (data.code == 0) {
-                        _this.renderHotProductList(data.data)
-                    }
-                },
-                error: function (status) {
-                    console.log(status)
+            // 用防抖函数包装
+            _this.$hotProductList.batterFn = utils.debounce(function () {
+                // 判断是否在可视区
+                if (utils.isVisibility(_this.$hotProductList)) {
+                    utils.ajax({
+                        method: 'get',
+                        url: '/products/hot',
+                        success: function (data) {
+                            if (data.code == 0) {
+                                _this.renderHotProductList(data.data)
+                            }
+                        },
+                        error: function (status) {
+                            console.log(status)
+                        }
+                    })
                 }
-            })
+            }, 200)
+            this.$win.on('scroll resize load', _this.$hotProductList.batterFn)
         },
         renderHotProductList: function (list) {
             var len = list.length
             var html = ''
             for (var i = 0; i < len; i++) {
-                html += `        <li class="product-item col-1 col-gap">
+                html += `<li class="product-item col-1 col-gap">
                 <a href="#">
                     <img width="180px" height="180px"
-                        src="${list[i].mainImage}"
+                        data-src="${list[i].mainImage}"
+                        src="./images/loading.gif"
                         alt="">
                     <p class="product-name">
                     ${list[i].name}
@@ -283,22 +300,38 @@
                 </a>
             </li>`
             }
-            this.hotProductList.innerHTML = html
+            this.$hotProductList.html(html)
+            this.$win.off('scroll resize load', this.$hotProductList.batterFn)
+            //加载图片
+            this.$hotProductList.find('.product-item img').each(function () {
+                var $img = $(this)
+                var imgSrc = $img.data('src')
+                utils.loadImage(imgSrc, function () {
+                    $img.attr('src', imgSrc)
+                })
+            })
         },
         handleFloor: function () {
             var _this = this
-            utils.ajax({
-                method: 'get',
-                url: '/floors',
-                success: function (data) {
-                    if (data.code == 0) {
-                        _this.renderFloor(data.data)
-                    }
-                },
-                error: function (status) {
-                    console.log(status)
+            // 防抖包装
+            _this.$floor.batterFn = utils.debounce(function () {
+                // 判断是否进入可视区
+                if (utils.isVisibility(_this.$floor)) {
+                    utils.ajax({
+                        method: 'get',
+                        url: '/floors',
+                        success: function (data) {
+                            if (data.code == 0) {
+                                _this.renderFloor(data.data)
+                            }
+                        },
+                        error: function (status) {
+                            console.log(status)
+                        }
+                    })
                 }
-            })
+            }, 200)
+            this.$win.on('scroll resize load', _this.$floor.batterFn)
         },
         renderFloor: function (list) {
             var len = list.length
@@ -317,7 +350,8 @@
                     html += `<li class="product-item col-1 col-gap">
                     <a href="#">
                         <img width="180px" height="180px"
-                            src="${product.mainImage}"
+                            data-src="${product.mainImage}"
+                            src="./images/loading.gif"
                             alt="">
                         <p class="product-name">
                         ${product.name}
@@ -341,74 +375,102 @@
             <span class="elevator-item-num"><i class="iconfont icon-jiantou"></i></span>
             <span class="elevator-item-text text-ellipsis" id="backToTop">顶部</span>
         </a>`
-            this.floor.innerHTML = html
-            this.elevator.innerHTML = elevatorHtml
-            this.floors = d.querySelectorAll('.floor-wrap')
-            this.elevatorItems = d.querySelectorAll('.elevator-item')
+            this.$floor.html(html)
+            // 移除事件
+            this.$win.off('scroll resize load', this.$floor.batterFn)
+            this.handleFloorImage()
+
+            this.$elevator.html(elevatorHtml)
+
+            // this.floors = d.querySelectorAll('.floor-wrap')
+            // this.elevatorItems = d.querySelectorAll('.elevator-item')
+        },
+        handleFloorImage: function () {
+            var _this = this
+            var $floors = $('.floor-wrap')
+
+            //已经加载图片的楼层个数
+            var totalLoadedNum = 0
+            //需要加载图片的楼层个数
+            var totalNum = $floors.length
+
+            var betterFn = utils.debounce(function () {
+                $floors.each(function () {
+                    $floorElem = $(this)
+                    if ($floorElem.data('isLoaded')) {
+                        return
+                    }
+                    if (utils.isVisibility($floorElem)) {
+                        var $imgs = $floorElem.find('.product-item img')
+                        $imgs.each(function () {
+                            var $img = $(this)
+                            var imgSrc = $img.data('src')
+                            utils.loadImage(imgSrc, function () {
+                                $img.attr('src', imgSrc)
+                            })
+                        })
+                        $floorElem.data('isLoaded', true)
+                        totalLoadedNum++
+                        //所有楼层的图片都加载完毕
+                        if (totalLoadedNum == totalNum) {
+                            $floors.trigger('loaded')
+                        }
+                    }
+                })
+            }, 200)
+
+            this.$win.on('scroll resize load', betterFn)
+            // 加载完毕时触发自定义事件load,移除事件
+            $floors.on('loaded', function () {
+                _this.$win.off('scroll resize load', betterFn)
+            })
         },
         handleElevator: function () {
             var _this = this
             //点击电梯，到达指定楼层
-            this.elevator.addEventListener('click', function (event) {
-                var elem = event.target
-                if (elem.id == 'backToTop') {
-                    // 回到顶部
-                    d.documentElement.scrollTop = 0
-                } else if (elem.className == 'elevator-item-text text-ellipsis') {
-                    //到达指定楼层
-                    var num = elem.getAttribute('data-num')
-                    if (!_this.floors) {
-                        return
-                    }
-                    var floor = _this.floors[num]
-                    d.documentElement.scrollTop = floor.offsetTop
+            this.$elevator.on('click', '.elevator-item-text', function () {
+                var $elem = $(this)
+                if ($elem.attr('id') === 'backToTop') {
+                    // 到顶部
+                    $('html,body').animate({
+                        scrollTop: 0
+                    })
+                } else {
+                    // 到达指定楼层
+                    $('html,body').animate({
+                        scrollTop: $('.floor-wrap').eq($elem.data('num')).offset().top
+                    })
                 }
-            }, false)
-            // 楼层进入可视区，电梯的状态
-            var betterSetElevator = function () {
-                if (_this.elevatorTimer) {
-                    clearTimeout(_this.elevatorTimer)
-                }
-                _this.elevatorTimer = setTimeout(function () {
-                    _this.setElevator()
-                }, 200)
-            }
-            w.addEventListener('scroll', betterSetElevator, false)
-            w.addEventListener('resize', betterSetElevator, false)
-            w.addEventListener('load', betterSetElevator, false)
+            })
+            // 根据楼哪个层进入可视区，显示电梯的状态
+            var betterSetElevator = utils.debounce(function () {
+                _this.setElevator()
+            }, 200)
+            this.$win.on('load scroll resize', betterSetElevator)
         },
         setElevator: function () {
-            if (!this.elevatorItems) {
-                return
-            }
             var num = this.getFloorNum()
             if (num == -1) {
-                utils.hide(this.elevator)
+                this.$elevator.hide()
             } else {
-                utils.show(this.elevator)
-                for (var i = 0, len = this.elevatorItems.length; i < len; i++) {
-                    if (num == i) {
-                        this.elevatorItems[i].className = 'elevator-item elevator-active'
-                    } else {
-                        this.elevatorItems[i].className = 'elevator-item'
-                    }
-                }
+                this.$elevator.show()
+                    .find('.elevator-item')
+                    .removeClass('elevator-active')
+                    .eq(num).addClass('elevator-active')
             }
         },
         getFloorNum: function () {
+            var _this = this
             // 设置一个默认的楼层号 顶部为-1层
             var num = -1
-            if (!this.floors) {
-                return num
-            }
-            for (var i = 0, len = this.floors.length; i < len; i++) {
-                var floor = this.floors[i]
-                num = i
-                if (floor.offsetTop > d.documentElement.scrollTop + d.documentElement.clientHeight / 2) {
-                    num = i - 1
-                    break
+            $('.floor-wrap').each(function (index) {
+                num = index
+                var $floorElem = $(this)
+                if ($floorElem.offset().top > _this.$win.scrollTop() + _this.$win.height() / 2) {
+                    num = index - 1
+                    return false
                 }
-            }
+            })
             return num
         }
     }
